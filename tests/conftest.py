@@ -2,7 +2,7 @@ import pytest
 import requests
 
 from curl import Url
-from generators import register_new_courier_and_return_login_password
+from generators import register_new_courier_and_return_login_password, generate_new_courier_data
 from methods.courier_methods import CourierMethods
 
 
@@ -26,3 +26,11 @@ def generate_courier_data():
         "password": password
     }
     requests.delete(f'{Url.BASE_URL}{Url.COURIER_URL}{courier_id}')
+
+@pytest.fixture(scope='function')
+def new_courier(courier_methods):
+    courier_data = generate_new_courier_data()
+    response = courier_methods.create_courier(courier_data)
+    yield response
+    courier_id = response.json().get("id")
+    courier_methods.delete_courier(courier_id)
